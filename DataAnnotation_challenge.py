@@ -3,67 +3,61 @@
 Created on Sat Jul 18 15:32:12 2026
 
 @author: micha
-
-output is "F"
+Output is F but with modified logic for submission
 """
 
 import pandas as pd
 
 # Define the target website URL
 url = "https://docs.google.com/document/d/e/2PACX-1vTMOmshQe8YvaRXi6gEPKKlsC6UpFJSMAk4mQjLm_u1gmHdVVTaeh7nBNFBRlui0sTZ-snGwZM4DBCT/pub"
-first_line = ""
-next_line = ""
-last_line = ""
+outputlines = []
+a_line = ""
 
 # Extract all tables found on the page
 tables = pd.read_html(url, encoding="utf-8")
 #tables = pd.read_html(url)
 
 # Print how many tables were found
-print(f"Total tables found: {len(tables)}")
+#print(f"Total tables found: {len(tables)}")
 
 # Display the first table found
 first_table = tables[0]
 
-first_table = first_table.drop(0)
+first_table = first_table.drop(0) #drop header line
 
-first_table.columns = ['X','CHAR','Y']
+first_table.columns = ['X','CHAR','Y'] #add new header
 
 #print(first_table)
 
 #sort it for ease of use
 first_table_sorted = first_table.sort_values(by=['Y', 'X'], ascending=[False,True])
 
-print(first_table_sorted)
+#print(first_table_sorted)
 
-#print line 0
-for prep_line in range(0,len(first_table)):
-    
-    first_line = first_line + " "
-    next_line = next_line + " "
-    last_line = last_line + " "
-    
-print("X" + first_line + "X")
-index = 0
-new_char = ""
+#see how long each line is to be
+line_length_max = first_table_sorted['X'].max()
 
-for x_loc in range(0,len(first_table)):
+for prep_line in range(0,int(line_length_max)+1):
+    a_line = a_line + " "
+
+#see how many lines max so can prep the string
+number_of_rows = first_table_sorted['Y'].max()
+
+for prep_line_string in range(0, int(number_of_rows)+1):
+    outputlines.append(a_line)
     
-    if int(first_table_sorted.iloc[x_loc,2]) == 2:
-        index = int(first_table_sorted.iloc[x_loc,0])
-        new_char = first_table_sorted.iloc[x_loc,1]
-        first_line = first_line[:index] + new_char + first_line[index + 1 :]
+for x_loc in range(int(number_of_rows), -1, -1):
+    a_line = outputlines[x_loc]
     
-    if int(first_table_sorted.iloc[x_loc,2]) == 1:
-        index = int(first_table_sorted.iloc[x_loc,0])
-        new_char = first_table_sorted.iloc[x_loc,1]
-        next_line = next_line[:index] + new_char + next_line[index + 1 :]
-        
-    if int(first_table_sorted.iloc[x_loc,2]) == 0:
-        index = int(first_table_sorted.iloc[x_loc,0])
-        new_char = first_table_sorted.iloc[x_loc,1]
-        last_line = last_line[:index] + new_char + last_line[index + 1 :]
-    
-print(first_line)
-print(next_line)
-print(last_line)
+    for table_rownum in range(0, len(first_table_sorted)):
+        if int(first_table_sorted.iloc[table_rownum,2]) == x_loc:
+            index = int(first_table_sorted.iloc[table_rownum,0])
+            new_char = first_table_sorted.iloc[table_rownum,1]
+            
+            a_line = a_line[:index] + new_char + a_line[index + 1 :]
+
+        outputlines[x_loc] = a_line
+
+#print final output
+for x_loc in range(int(number_of_rows), -1, -1):
+    print(outputlines[x_loc])
